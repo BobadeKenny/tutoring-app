@@ -21,3 +21,8 @@
 <p><strong>Parameters</strong></p>
 <p>token (provided during log in).</p>
 
+<strong>GET /:token/:category/subjects</strong>
+<p>Access all subjects in a category.</p>
+<p><strong>Parameters</strong></p>
+<p>token (provided during log in).</p>
+<p>category (any one of the three subject categories)</p>

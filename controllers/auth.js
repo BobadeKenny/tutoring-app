@@ -3,7 +3,7 @@ const bcrypt = require("bcryptjs")
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 const config = require("../config")
-
+const verify = require("./verify")
 
 exports.signUp = (req, res, next) => {
   const email = req.body.email;
@@ -71,18 +71,62 @@ return res
 );
 }
 const token = jwt.sign(
-{ email, _id: User._id },
+{ email: user.email, _id: user._id },
 config.secret,
-{ expiresIn: "1hr" }
+{ expiresIn: 86400 }
 );
 res.status(200).send({
-_id: User._id,
-token,
-email,
-category
+_id: user._id,
+token
 });
 });
 })
 .catch(err => console.log(err));
 }
+
+
+exports.user = (req, res, next) => {
+	var token = req.headers['x-access-token'];
+	if (!token) {
+		return res.status(401).send({
+			status: false,
+			message: "No token provided."
+		})
+	}
+	jwt.verify(token, config.secret, function(err, decoded){
+		if (err){
+			return res.status(500).send({
+			status: false,
+			message: "Failed to authenticate token."
+		})
+		}
+		res.status(200).send(decoded)
+	})
+}
+
+exports.categories = (req, res, next) => {
+	var token = req.headers['x-access-token'];
+	if (!token) {
+		return res.status(401).send({
+			status: false,
+			message: "No token provided."
+		})
+	}
+	jwt.verify(token, config.secret, function(err, decoded){
+		if (err){
+			return res.status(500).send({
+			status: false,
+			message: "Failed to authenticate token."
+		})
+		}
+		User.findById(decoded.id, 
+    { password: 0 }, 
+    function (err, user) {
+      return res.status(200).send({User.subjects});
+     
+        })
+	})
+}
+
+
 

@@ -25,7 +25,18 @@
 <p>Access all users.[Admin only]</p>
 <p><strong>Parameters</strong></p>
 <p>token (provided during log in).</p>
-<p
+
+<strong>PUT /api/v1/user/:userId</strong>
+<p>Updates user by Id.[Admin only]</p>
+<p><strong>Parameters</strong></p>
+<p>userId.</p>
+
+<strong>DELETE /api/v1/user/:userId</strong>
+<p>Deletes user by Id.[Admin only]</p>
+<p><strong>Parameters</strong></p>
+<p>userId.</p>
+
+
 
 
 

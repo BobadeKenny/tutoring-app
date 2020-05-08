@@ -1,7 +1,7 @@
 const AccessControl = require("accesscontrol");
 const ac = new AccessControl();
 
-exports.userCategories = (function(){
+exports.verifyUser = (function(){
 	ac.grant("student")
 	.extend("tutor")
 	.readOwn("profile")

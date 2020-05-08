@@ -19,15 +19,40 @@ exports.signUp = (req, res, next) => {
 })
  return;
 }
+if (category == 'admin'){
+	User.findOne({$and: [{category:'tutor'}, {email}]})
+	.then(user => {
+		if (!user){
+			return res
+          .status(423)
+          .send({status: false, message: "Unauthorized to be an admin."});
+		}
+	
+	bcrypt
+    .hash(password, 12)
+    .then(password => {
+      let user = new User({
+        email,
+        password,
+        name,
+        category,
+      });
+      return user.save();
+    })
+    .then(() => res.status(200).send({ status: true, message: "User registered successfully" }))
+    .catch(err => console.log(err));
+})
+}
 if(category != 'tutor' ){
 	if(category != 'student'){
+		if (category != 'admin'){
 	res.status(400).send({
 		message: "Invalid user category."
 	})
 	return;
-}}
+}}}
 
-User.findOne({ $and: [ {category}, {email}] })
+User.findOne({ $and: [ {category: category}, {email}] })
 		.then(user => {
       if (user) {
         return res
@@ -105,6 +130,54 @@ exports.user = (req, res, next) => {
 }
 
 
+exports.grantAccess = function(action, resource) {
+ return async (req, res, next) => {
+  try {
+   const permission = verifyUser.can(req.user.category)[action](resource);
+   if (!permission.granted) {
+    return res.status(401).json({
+     error: "You don't have enough permission to perform this action"
+    });
+   }
+   next()
+  } catch (error) {
+   next(error)
+  }
+ }
+}
 
+exports.updateUser = async (req, res, next) => {
+ try {
+  const update = req.body
+  const userId = req.params.userId;
+  await User.findByIdAndUpdate(userId, update);
+  const user = await User.findById(userId)
+  res.status(200).json({
+   data: user,
+   message: 'User has been updated'
+  });
+ } catch (error) {
+  next(error)
+ }
+}
 
+exports.deleteUser = async (req, res, next) => {
+ try {
+  const userId = req.params.userId;
+  await User.findByIdAndDelete(userId);
+  res.status(200).json({
+   data: null,
+   message: 'User has been deleted'
+  });
+ } catch (error) {
+  next(error)
+ }
+}
+
+exports.getUsers = async (req, res, next) => {
+ const users = await User.find({});
+ res.status(200).json({
+  data: users
+ });
+}
 

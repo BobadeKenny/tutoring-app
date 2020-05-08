@@ -21,12 +21,12 @@
 <p><strong>Parameters [header]</strong></p>
 <p>x-access-token: token (provided during log in).</p>
 
-<strong>GET /:token/:category/subjects</strong>
-<p>Access all subjects in a category.</p>
+<strong>GET /api/v1/users</strong>
+<p>Access all users.[Admin only]</p>
 <p><strong>Parameters</strong></p>
 <p>token (provided during log in).</p>
-<p>category (any one of the three subject categories)</p>
+<p
 
 
 
-Unfortunately, the remaining files for this project has not been uploaded due to power outage. It will be completed as soon as possible.
+Unfortunately, this project could not be completed due to power outage. It will be completed as soon as possible.

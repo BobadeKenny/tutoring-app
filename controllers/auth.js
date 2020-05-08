@@ -1,11 +1,9 @@
 
 const bcrypt = require("bcryptjs")
 const jwt = require("jsonwebtoken");
-const Student = require("../models/student");
-const Admin = require("../models/admin");
 const User = require("../models/user");
+const config = require("../config")
 
-userCategories = ['admin', 'student', 'tutor']
 
 exports.signUp = (req, res, next) => {
   const email = req.body.email;
@@ -21,21 +19,22 @@ exports.signUp = (req, res, next) => {
 })
  return;
 }
-if(!(userCategories.includes(category))){
+if(category != 'tutor' ){
+	if(category != 'student'){
 	res.status(400).send({
 		message: "Invalid user category."
 	})
 	return;
-}
-User.find({ category })
-	.then(User.findOne({ email })
+}}
+
+User.findOne({ $and: [ {category}, {email}] })
 		.then(user => {
       if (user) {
         return res
           .status(423)
           .send({status: false, message: "This user already exists"});
       }
-    }))
+    })
   bcrypt
     .hash(password, 12)
     .then(password => {
@@ -55,8 +54,7 @@ exports.logIn = (req, res, next) => {
 const email = req.body.email;
 const password = req.body.password;
 const category = req.body.category;
-User.find({ category })
-.then(User.findOne({ email })
+User.findOne({ $and: [ {category}, {email}] })
 	.then(user => {
 if (!user) {
 return res
@@ -73,15 +71,18 @@ return res
 );
 }
 const token = jwt.sign(
-{ email: user.email, _id: user._id },
-"somesecretkey",
+{ email, _id: User._id },
+config.secret,
 { expiresIn: "1hr" }
 );
 res.status(200).send({
-_id: user._id,
-token
+_id: User._id,
+token,
+email,
+category
 });
 });
-}))
+})
 .catch(err => console.log(err));
 }
+

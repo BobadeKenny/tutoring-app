@@ -1,11 +1,9 @@
 
 const bcrypt = require("bcryptjs")
 const jwt = require("jsonwebtoken");
-const Student = require("../models/student");
-const Admin = require("../models/admin");
 const User = require("../models/user");
-
-userCategories = ['admin', 'student', 'tutor']
+const config = require("../config")
+const verify = require("./verify")
 
 exports.signUp = (req, res, next) => {
   const email = req.body.email;
@@ -21,21 +19,22 @@ exports.signUp = (req, res, next) => {
 })
  return;
 }
-if(!(userCategories.includes(category))){
+if(category != 'tutor' ){
+	if(category != 'student'){
 	res.status(400).send({
 		message: "Invalid user category."
 	})
 	return;
-}
-User.find({ category })
-	.then(User.findOne({ email })
+}}
+
+User.findOne({ $and: [ {category}, {email}] })
 		.then(user => {
       if (user) {
         return res
           .status(423)
           .send({status: false, message: "This user already exists"});
       }
-    }))
+    })
   bcrypt
     .hash(password, 12)
     .then(password => {
@@ -55,8 +54,7 @@ exports.logIn = (req, res, next) => {
 const email = req.body.email;
 const password = req.body.password;
 const category = req.body.category;
-User.find({ category })
-.then(User.findOne({ email })
+User.findOne({ $and: [ {category}, {email}] })
 	.then(user => {
 if (!user) {
 return res
@@ -74,14 +72,61 @@ return res
 }
 const token = jwt.sign(
 { email: user.email, _id: user._id },
-"somesecretkey",
-{ expiresIn: "1hr" }
+config.secret,
+{ expiresIn: 86400 }
 );
 res.status(200).send({
 _id: user._id,
 token
 });
 });
-}))
+})
 .catch(err => console.log(err));
 }
+
+
+exports.user = (req, res, next) => {
+	var token = req.headers['x-access-token'];
+	if (!token) {
+		return res.status(401).send({
+			status: false,
+			message: "No token provided."
+		})
+	}
+	jwt.verify(token, config.secret, function(err, decoded){
+		if (err){
+			return res.status(500).send({
+			status: false,
+			message: "Failed to authenticate token."
+		})
+		}
+		res.status(200).send(decoded)
+	})
+}
+
+exports.categories = (req, res, next) => {
+	var token = req.headers['x-access-token'];
+	if (!token) {
+		return res.status(401).send({
+			status: false,
+			message: "No token provided."
+		})
+	}
+	jwt.verify(token, config.secret, function(err, decoded){
+		if (err){
+			return res.status(500).send({
+			status: false,
+			message: "Failed to authenticate token."
+		})
+		}
+		User.findById(decoded.id, 
+    { password: 0 }, 
+    function (err, user) {
+      return res.status(200).send({User.subjects});
+     
+        })
+	})
+}
+
+
+

@@ -3,7 +3,7 @@ const bcrypt = require("bcryptjs")
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 const config = require("../config")
-const verify = require("./verify")
+const verifyUser = require("../models/verifyUser")
 
 exports.signUp = (req, res, next) => {
   const email = req.body.email;
@@ -104,29 +104,7 @@ exports.user = (req, res, next) => {
 	})
 }
 
-exports.categories = (req, res, next) => {
-	var token = req.headers['x-access-token'];
-	if (!token) {
-		return res.status(401).send({
-			status: false,
-			message: "No token provided."
-		})
-	}
-	jwt.verify(token, config.secret, function(err, decoded){
-		if (err){
-			return res.status(500).send({
-			status: false,
-			message: "Failed to authenticate token."
-		})
-		}
-		User.findById(decoded.id, 
-    { password: 0 }, 
-    function (err, user) {
-      return res.status(200).send({User.subjects});
-     
-        })
-	})
-}
+
 
 
 

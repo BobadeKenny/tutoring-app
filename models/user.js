@@ -1,39 +1,40 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-
-const userSchema = new Schema({
-  email: {
-    type: String,
-    required: true
-  },
-  password: {
-    type: String,
-    required: true
-  },
-  name: {
-    type: String,
-    required: true
-  },
-  category: {
-    type: String,
-    required: true
-  },
-  subjects: {
-    primary: ["math", "english", "science"],
-    jss: ["math", "english", "social studies"],
-    sss: ["math", "biology", "chemistry"]
-  },
-  mySubjects: {
-    type: Array
-  },
-  token: {
-    type: String
-  },
-
-   
-  
-},
- {timestamps: true });
-
-
-module.exports = mongoose.model("User", userSchema);
+ 
+const UserSchema = new Schema({
+ email: {
+  type: String,
+  required: true,
+  trim: true
+ },
+ password: {
+  type: String,
+  required: true
+ },
+ name: {
+ 	type: String,
+ 	required: true
+ },
+ role: {
+  type: String,
+  enum: ["student", "tutor"],
+  required: true
+ },
+ subjects: {
+ 	type: Array
+ }, 
+ lessons: {
+ 	type: Array
+ },
+ accessToken: {
+  type: String
+ }, 
+ admin:{
+ 	type: Boolean,
+ 	default: false
+ }
+});
+ 
+const User = mongoose.model('user', UserSchema);
+ 
+module.exports = User;

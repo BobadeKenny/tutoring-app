@@ -1,58 +1,16 @@
+const User = require('../models/user');
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 
-const bcrypt = require("bcryptjs")
-const jwt = require("jsonwebtoken");
-const User = require("../models/user");
-const config = require("../config")
-const verifyUser = require("../models/verifyUser")
 
 exports.signUp = (req, res, next) => {
   const email = req.body.email;
   const password = req.body.password;
   const name = req.body.name
-  const category = req.body.category
- 
+  const role = req.body.role
 
-  if(!email || !password || !name || !category) {
-     res.status(400).send({
-        status: false,
-        message: "All fields are required"
-})
- return;
-}
-if (category == 'admin'){
-	User.findOne({$and: [{category:'tutor'}, {email}]})
-	.then(user => {
-		if (!user){
-			return res
-          .status(423)
-          .send({status: false, message: "Unauthorized to be an admin."});
-		}
-	
-	bcrypt
-    .hash(password, 12)
-    .then(password => {
-      let user = new User({
-        email,
-        password,
-        name,
-        category,
-      });
-      return user.save();
-    })
-    .then(() => res.status(200).send({ status: true, message: "User registered successfully" }))
-    .catch(err => console.log(err));
-})
-}
-if(category != 'tutor' ){
-	if(category != 'student'){
-		if (category != 'admin'){
-	res.status(400).send({
-		message: "Invalid user category."
-	})
-	return;
-}}}
 
-User.findOne({ $and: [ {category: category}, {email}] })
+  User.findOne({ $and: [ {role}, {email}] })
 		.then(user => {
       if (user) {
         return res
@@ -67,26 +25,26 @@ User.findOne({ $and: [ {category: category}, {email}] })
         email,
         password,
         name,
-        category,
+        role,
       });
       return user.save();
     })
     .then(() => res.status(200).send({ status: true, message: "User registered successfully" }))
     .catch(err => console.log(err));
 };
+ 
+
 
 exports.logIn = (req, res, next) => {
 const email = req.body.email;
 const password = req.body.password;
-const category = req.body.category;
-User.findOne({ $and: [ {category}, {email}] })
-	.then(user => {
+User.findOne({ email })
+.then(user => {
 if (!user) {
 return res
 .status(404)
 .send("User not found, please provide valid credentials");
 }
-
 bcrypt.compare(password, user.password).then(valid => {
 if (!valid) {
 return res
@@ -95,89 +53,74 @@ return res
 "Incorrect username or password, please review details and try again"
 );
 }
-const token = jwt.sign(
+const accessToken = jwt.sign(
 { email: user.email, _id: user._id },
-config.secret,
-{ expiresIn: 86400 }
+process.env.JWT_SECRET,
+{ expiresIn: "1hr" }
 );
+User.findByIdAndUpdate(user._id, { accessToken })
 res.status(200).send({
 _id: user._id,
-token
+accessToken,
+Role: user.role,
+Email: user.email
 });
 });
 })
 .catch(err => console.log(err));
 }
 
-
-exports.user = (req, res, next) => {
-	var token = req.headers['x-access-token'];
-	if (!token) {
-		return res.status(401).send({
-			status: false,
-			message: "No token provided."
-		})
-	}
-	jwt.verify(token, config.secret, function(err, decoded){
-		if (err){
-			return res.status(500).send({
-			status: false,
-			message: "Failed to authenticate token."
-		})
+exports.adminSignup = (req, res, next) => {
+	const email = req.body.email;
+	User.findOne({$and: [ {email}, {role: 'tutor'} ]})
+	.then(user => {
+		if (!user) {
+			return res.status(404).send("You are not authorised to access this page.")
 		}
-		res.status(200).send(decoded)
+	User.updateOne({_id: user._id},  {admin: true} )
+	.then(() =>{
+		res.status(200).send({
+		Message: "Congratulations. You are now an admin.",
+		_id: user._id,
+		Admin: user.admin
+		 
+
 	})
+	})
+	
+	})
+	.catch(err => console.log(err))
 }
 
-
-exports.grantAccess = function(action, resource) {
- return async (req, res, next) => {
-  try {
-   const permission = verifyUser.can(req.user.category)[action](resource);
-   if (!permission.granted) {
-    return res.status(401).json({
-     error: "You don't have enough permission to perform this action"
-    });
-   }
-   next()
-  } catch (error) {
-   next(error)
-  }
- }
+exports.adminLogin = (req, res, next) => {
+	const email = req.body.email;
+	const password = req.body.password;
+	User.findOne({$and: [ {email}, {admin: true} ]})
+	.then(user => {
+		if (!user) {
+			return res.status(404).send("You are not authorised to access this page.")
+		}
+	bcrypt.compare(password, user.password).then(valid => {
+if (!valid) {
+return res
+.status(403)
+.send(
+"Incorrect username or password, please review details and try again"
+);
 }
-
-exports.updateUser = async (req, res, next) => {
- try {
-  const update = req.body
-  const userId = req.params.userId;
-  await User.findByIdAndUpdate(userId, update);
-  const user = await User.findById(userId)
-  res.status(200).json({
-   data: user,
-   message: 'User has been updated'
-  });
- } catch (error) {
-  next(error)
- }
+const accessToken = jwt.sign(
+{ email: user.email, _id: user._id },
+process.env.JWT_SECRET,
+{ expiresIn: "1hr" }
+);
+User.findByIdAndUpdate(user._id, { accessToken })
+res.status(200).send({
+_id: user._id,
+accessToken,
+Role: user.role,
+Email: user.email
+});
+});
+})
+.catch(err => console.log(err));
 }
-
-exports.deleteUser = async (req, res, next) => {
- try {
-  const userId = req.params.userId;
-  await User.findByIdAndDelete(userId);
-  res.status(200).json({
-   data: null,
-   message: 'User has been deleted'
-  });
- } catch (error) {
-  next(error)
- }
-}
-
-exports.getUsers = async (req, res, next) => {
- const users = await User.find({});
- res.status(200).json({
-  data: users
- });
-}
-

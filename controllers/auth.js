@@ -9,7 +9,9 @@ exports.signUp = (req, res, next) => {
   const name = req.body.name
   const role = req.body.role
 
-
+  if(!email || !password || !name || !role){
+  	return res.status(400).send("All fields are required.")
+  }
   User.findOne({ $and: [ {role}, {email}] })
 		.then(user => {
       if (user) {
@@ -111,7 +113,7 @@ return res
 const accessToken = jwt.sign(
 { email: user.email, _id: user._id },
 process.env.JWT_SECRET,
-{ expiresIn: "1hr" }
+{ expiresIn: 86400 }
 );
 User.findByIdAndUpdate(user._id, { accessToken })
 res.status(200).send({
@@ -123,4 +125,10 @@ Email: user.email
 });
 })
 .catch(err => console.log(err));
+}
+
+exports.getSubjectByCategory = (req, res, next) => {
+	const category = req.params.category;
+	const accessToken = req.headers['access-token'];
+
 }

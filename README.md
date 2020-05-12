@@ -20,20 +20,20 @@
 <p><strong>Parameters [body][x-www-form-urlencoded]</strong></p>
 <p>email.</p>
 
-<strong>GET /api/v1/users</strong>
-<p>Access all users.[Admin only]</p>
-<p><strong>Parameters</strong></p>
-<p>token (provided during log in).</p>
+<strong>POST /api/v1/admin/login</strong>
+<p>Access admin features.[Admin only]</p>
+<p><strong>Parameters [header]</strong></p>
+<p>access-token (provided during log in).</p>
 
-<strong>PUT /api/v1/user/:userId</strong>
-<p>Updates user by Id.[Admin only]</p>
-<p><strong>Parameters</strong></p>
-<p>userId.</p>
+<strong>GET /api/v1/categories</strong>
+<p>Access all subject categories.</p>
+<p><strong>Parameters [header]</strong></p>
+<p>access-token (provided during log in).</p>
 
-<strong>DELETE /api/v1/user/:userId</strong>
-<p>Deletes user by Id.[Admin only]</p>
-<p><strong>Parameters</strong></p>
-<p>userId.</p>
+<strong>GET /api/v1/subjects/:category</strong>
+<p>Access subjects by categories.</p>
+<p><strong>Parameters [header]</strong></p>
+<p>access-token (provided during log in).</p>
 
 
 

@@ -7,10 +7,10 @@ const SubjectSchema = new Schema({
  },
  category: {
  	type: String,
- 	enum = ['jss', 'primary', 'sss']
+ 	enum: ['jss', 'primary', 'sss']
  }
 });
  
-const User = mongoose.model('subject', SubjectSchema);
+const Subject = mongoose.model('subject', SubjectSchema);
  
 module.exports = Subject;

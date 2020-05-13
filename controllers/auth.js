@@ -170,3 +170,9 @@ exports.getAllCategories = (req, res, next) => {
 	.catch(err => console.log(err))
 
 }
+
+exports.createSubject = (req,res,next) => {
+	const accessToken = req.body.token;
+	const subject = req.body.subject;
+	const category = req.body.category;
+}

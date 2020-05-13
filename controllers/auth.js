@@ -1,4 +1,5 @@
 const User = require('../models/user');
+const Subject = require('../models/subjects');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 
@@ -58,15 +59,17 @@ return res
 const accessToken = jwt.sign(
 { email: user.email, _id: user._id },
 process.env.JWT_SECRET,
-{ expiresIn: "1hr" }
+{ expiresIn: 86400 }
 );
 User.findByIdAndUpdate(user._id, { accessToken })
-res.status(200).send({
+.then(() => {
+	res.status(200).send({
 _id: user._id,
 accessToken,
 Role: user.role,
 Email: user.email
 });
+})
 });
 })
 .catch(err => console.log(err));
@@ -130,5 +133,40 @@ Email: user.email
 exports.getSubjectByCategory = (req, res, next) => {
 	const category = req.params.category;
 	const accessToken = req.headers['access-token'];
+	User.findOne({accessToken})
+	.then((user) => {
+		if (!user){
+			return res.status(400).send("You must be logged in.")
+		}
+		Subject.find({category})
+		.then(subject => {
+			res.status(200).send({
+				Category: subject.category,
+				Subjects: subject.name
+
+			})
+		})
+	})
+	.catch(err => console.log(err))
+
+}
+
+exports.getAllCategories = (req, res, next) => {
+	const accessToken = req.headers['access-token'];
+	User.findOne({accessToken})
+	.then((user) => {
+		if (!user){
+			return res.status(400).send("You must be logged in.")
+		}
+		Subject.find()
+		.then(subject => {
+			res.status(200).send({
+				Categories: subject.category,
+				
+
+			})
+		})
+	})
+	.catch(err => console.log(err))
 
 }

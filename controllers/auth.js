@@ -82,12 +82,11 @@ exports.adminSignup = (req, res, next) => {
 		if (!user) {
 			return res.status(404).send("You are not authorised to access this page.")
 		}
-	User.updateOne({_id: user._id},  {admin: true} )
+	User.findByIdAndUpdate( user._id,  {admin: true} )
 	.then(() =>{
 		res.status(200).send({
 		Message: "Congratulations. You are now an admin.",
 		_id: user._id,
-		Admin: user.admin
 		 
 
 	})
@@ -119,12 +118,15 @@ process.env.JWT_SECRET,
 { expiresIn: 86400 }
 );
 User.findByIdAndUpdate(user._id, { accessToken })
-res.status(200).send({
+.then(() => {
+		res.status(200).send({
 _id: user._id,
 accessToken,
 Role: user.role,
 Email: user.email
 });
+
+})
 });
 })
 .catch(err => console.log(err));
@@ -139,10 +141,10 @@ exports.getSubjectByCategory = (req, res, next) => {
 			return res.status(400).send("You must be logged in.")
 		}
 		Subject.find({category})
-		.then(subject => {
+		.then(subjects => {
 			res.status(200).send({
-				Category: subject.category,
-				Subjects: subject.name
+				Category: subjects.category,
+				Subjects: subjects.name
 
 			})
 		})
@@ -158,7 +160,7 @@ exports.getAllCategories = (req, res, next) => {
 		if (!user){
 			return res.status(400).send("You must be logged in.")
 		}
-		Subject.find()
+		Subject.find({})
 		.then(subject => {
 			res.status(200).send({
 				Categories: subject.category,
@@ -167,6 +169,76 @@ exports.getAllCategories = (req, res, next) => {
 			})
 		})
 	})
+	.catch(err => console.log(err))
+
+}
+
+exports.createSubject = (req,res,next) => {
+	const accessToken = req.body.token;
+	const name = req.body.name;
+	const category = req.body.category;
+	User.findOne({$and: [ {accessToken}, {admin: true} ]})
+	.then((user) => {
+		if (!user){
+			return res.status(400).send("Not authorised.")
+		}
+		Subject.findOne({$and: [{name}, {category}]})
+		.then(subject => {
+			if (subject){
+				res.status(400).send({
+				Message: 'Subject already exists.'
+				})}
+		let subjects = new Subject({
+        name,
+        category
+   
+      });
+      return subjects.save();
+		})
+		.then(() => res.status(200).send({ status: true, message: "Subject created successfully" }))
+	})
+	.catch(err => console.log(err))
+
+}
+
+exports.getTutors = (req, res, next) => {
+	const accessToken = req.body.token;
+	User.findOne({$and: [ {accessToken}, {admin: true} ]})
+	.then((user) => {
+		if (!user){
+			return res.status(400).send("Not authorised.")
+		}
+		User.find({role: 'tutor'})
+		.then((user) => {
+			res.status(200).send({
+				user
+
+			})
+		})
+		})
+	.catch(err => console.log(err))
+
+}
+
+exports.getTutor = (req, res, next) => {
+	const accessToken = req.body.token;
+	const id = req.params.id
+	User.findOne({$and: [ {accessToken}, {admin: true} ]})
+	.then((user) => {
+		if (!user){
+			return res.status(400).send("Not authorised.")
+		}
+		User.find({id})
+		.then((user) => {
+			if (!user){
+				return res.status(400).send("Tutor not found")
+			}
+			res.status(200).send({
+				user
+
+			})
+		})
+		})
 	.catch(err => console.log(err))
 
 }

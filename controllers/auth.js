@@ -228,13 +228,36 @@ exports.getTutor = (req, res, next) => {
 		if (!user){
 			return res.status(400).send("Not authorised.")
 		}
-		User.find({id})
+		User.findById(id)
 		.then((user) => {
 			if (!user){
 				return res.status(400).send("Tutor not found")
 			}
 			res.status(200).send({
 				user
+
+			})
+		})
+		})
+	.catch(err => console.log(err))
+
+}
+
+exports.deleteTutor = (req, res, next) => {
+	const accessToken = req.body.token;
+	const id = req.params.id
+	User.findOne({$and: [ {accessToken}, {admin: true} ]})
+	.then((user) => {
+		if (!user){
+			return res.status(400).send("Not authorised.")
+		}
+		User.findByIdAndDelete(id)
+		.then((user) => {
+			if (!user){
+				return res.status(400).send("Tutor not found")
+			}
+			res.status(200).send({
+			Message: 'User has been deleted.'
 
 			})
 		})

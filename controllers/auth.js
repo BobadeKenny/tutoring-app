@@ -202,7 +202,7 @@ exports.createSubject = (req,res,next) => {
 }
 
 exports.getTutors = (req, res, next) => {
-	const accessToken = req.body.token;
+	const accessToken = req.headers['access-token'];
 	User.findOne({$and: [ {accessToken}, {admin: true} ]})
 	.then((user) => {
 		if (!user){
@@ -221,7 +221,7 @@ exports.getTutors = (req, res, next) => {
 }
 
 exports.getTutor = (req, res, next) => {
-	const accessToken = req.body.token;
+	const accessToken = req.headers['access-token'];
 	const id = req.params.id
 	User.findOne({$and: [ {accessToken}, {admin: true} ]})
 	.then((user) => {
@@ -244,7 +244,7 @@ exports.getTutor = (req, res, next) => {
 }
 
 exports.deleteTutor = (req, res, next) => {
-	const accessToken = req.body.token;
+	const accessToken = req.headers['access-token'];
 	const id = req.params.id
 	User.findOne({$and: [ {accessToken}, {admin: true} ]})
 	.then((user) => {

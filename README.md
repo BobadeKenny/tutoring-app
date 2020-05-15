@@ -25,7 +25,7 @@
 <p><strong>Parameters [header]</strong></p>
 <p>access-token (provided during log in).</p>
 
-<strong>GET /api/v1/categories</strong>
+<strong>GET /api/v1/subjects/categories</strong>
 <p>Access all subject categories.</p>
 <p><strong>Parameters [header]</strong></p>
 <p>access-token (provided during log in).</p>
@@ -35,8 +35,31 @@
 <p><strong>Parameters [header]</strong></p>
 <p>access-token (provided during log in).</p>
 
+<strong>POST /api/v1/subjects/create</strong>
+<p>Create new subject.</p>
+<p><strong>Parameters [body][x-www-form-urlencoded]</strong></p>
+<p>accessToken (provided during log in).</p>
+<p>name [subject name].</p>
+<p>category.</p>
+
+<strong>GET /api/v1/tutors</strong>
+<p>Get all tutors.</p>
+<p><strong>Parameters [header]</strong></p>
+<p>access-token (provided during log in).</p>
+
+<strong>GET /api/v1/tutors/:id</strong>
+<p>Get a tutor by ID.</p>
+<p><strong>Parameters [header]</strong></p>
+<p>access-token (provided during log in).</p>
+
+
+<strong>DELETE /api/v1/tutors/:id</strong>
+<p>Delete a tutor by ID.</p>
+<p><strong>Parameters [header]</strong></p>
+<p>access-token (provided during log in).</p>
 
 
 
 
-Unfortunately, this project could not be completed due to power outage. It will be completed as soon as possible.
+
+
